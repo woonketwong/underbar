@@ -17,16 +17,13 @@ var _ = { };
   // return just the first element.
   _.first = function(array, n) {
 
-    if (n == undefined)
-    {
+    if (n === undefined){
        return array[0];
     }
-    else if (n != 0)
-    {
+    else if (n != 0){
        return array.slice(0,n);
     }
-    else
-    {
+    else{
        return [];
     }
   };
@@ -34,37 +31,30 @@ var _ = { };
   // Like first, but for the last elements. If n is undefined, return just the
   // last element.
   _.last = function(array, n) {
-  
-    if (n == undefined)
-    {
-       return array[array.length-1];
-    }
-    else if (n != 0 && n <= array.length)
-    {
-       return array.slice(array.length-n,array.length+1);
-    }
-    else if (n > array.length)
-       return array;
-    else
-    {
-       return [];
-    }
+    var revArray = array.reverse();
+    var result = _.first(revArray,n);
+    
+    if (typeof(result) == "object"){
+    	result = result.reverse();
+    } 
+    
+    return result;
   };
 
   // Call iterator(value, key, collection) for each element of collection.
   // Accepts both arrays and objects.
-  _.each = function(collection, iterator) {
+  _.each = function(collection, iterator){
     if ( Array.isArray(collection) )
     {
-      for (var i = 0; i < collection.length; i++ ){
-        iterator(collection[i], i, collection);
-      };
+    	for (var i = 0; i < collection.length; i++ ){
+        	iterator(collection[i], i, collection);
+      	};
     }
     else if ( typeof(collection) === "object")
     {
-      for (var key in collection){
-      	iterator(collection[key], key, collection);
-      };
+      	for (var key in collection){
+      		iterator(collection[key], key, collection);
+      	};
     };
   };
 
@@ -93,7 +83,7 @@ var _ = { };
   	_.each(collection, function(value){
   		if (iterator(value) == true)
   		{
-  		  result.push(value);
+  			result.push(value);
   		};
   	}
   	);
@@ -110,7 +100,7 @@ var _ = { };
   	_.each(collection, function(value){
   		if (iterator(value) != true)
   		{
-  		  result.push(value);
+  			result.push(value);
   		};
   	}
   	);
@@ -136,10 +126,7 @@ var _ = { };
     	}
     	else 
     	{
-    		//if (array[i] != array[i - 1])
-    		//{
-    			result.push(array[i]);
-    		//};
+			result.push(array[i]);
     	};
     };
 
@@ -155,10 +142,9 @@ var _ = { };
     // the members, it also maintains an array of results.
     var result = [];
     
-      for (var i = 0; i < array.length; i++ ){
+	for (var i = 0; i < array.length; i++ ){
         result.push(iterator(array[i]));
-      };
-    
+    };
     
     return result;
   };
@@ -176,20 +162,20 @@ var _ = { };
     // TIP: map is really handy when you want to transform an array of
     // values into a new array of values. _.pluck() is solved for you
     // as an example of this.
-    return _.map(array, function(value){
-      return value[propertyName];
+	return _.map(array, function(value){
+    	return value[propertyName];
     });
   };
 
   // Calls the method named by methodName on each value in the list.
   _.invoke = function(list, methodName, args) {
-  	var result = [];
-  	for ( var i = 0; i < list.length; i++)
-  	{
-  		var exe1 = "list[i] methodName";
-  		result.push(eval(exe1)); 
-  	}
-  	return result;
+    
+	return _.map(list, function(value){
+		if (typeof methodName === "string"){
+			methodName = value[methodName];
+        }
+		return (methodName.apply(value, args));
+    });
   };
 
   // Reduces an array or object to a single value by repetitively calling
@@ -206,30 +192,98 @@ var _ = { };
   //   }, 0); // should be 6
   //
   _.reduce = function(collection, iterator, initialValue) {
+  
+    var total = initialValue;
+    
+    if ((total === undefined) && (collection.length >= 1)){
+    	total = 0;
+    }
+    
+    // Collection is Object or Array?
+    if (typeof(collection) === "object") { 
+    	for (var key in collection){
+    		total = iterator(total, collection[key]);
+    	};
+    }
+    else {
+    	for (var i = 0; i < collection.length; i++)
+    	{
+    		total = iterator(total, collection[i]);
+    	};
+    };
+    
+    return total;
+    
   };
 
   // Determine if the array or object contains a given value (using `===`).
   _.contains = function(collection, target) {
     // TIP: Many iteration problems can be most easily expressed in
     // terms of reduce(). Here's a freebie to demonstrate!
-    return _.reduce(collection, function(wasFound, item) {
-      if(wasFound) {
-        return true;
-      }
-      return item === target;
-    }, false);
+    
+	return _.reduce(collection, function(wasFound, item) {
+    if(wasFound) {
+		return true;
+	}
+	return item === target;
+	}, false);
   };
+
 
 
   // Determine whether all of the elements match a truth test.
   _.every = function(collection, iterator) {
     // TIP: Try re-using reduce() here.
+    
+    return _.reduce(collection, function(wasFound, item){
+		var iteratorResult;
+        	
+        // check whether an iterator exists
+        if (iterator == undefined){
+        	iteratorResult = item;
+        }
+        else{
+        	iteratorResult = iterator(item);
+        };
+        	
+        // check item state
+        if ((iteratorResult == false) || (iteratorResult == undefined)){ 
+        	return false;
+        }
+        else{
+        	return wasFound;
+        };
+    }, true);
   };
 
   // Determine whether any of the elements pass a truth test. If no iterator is
   // provided, provide a default one
   _.some = function(collection, iterator) {
     // TIP: There's a very clever way to re-use every() here.
+    var result = false;
+    
+	_.every(collection, function(item){
+	
+        if (iterator != undefined) {	
+			if (iterator(item)){
+				result = true;
+			};
+		}
+		else{
+			if (item){
+				result = true;
+			};
+		};
+		
+		if (result == true){
+			return true;
+		}
+		else{
+			return false;
+		}
+		
+	});
+	return result;
   };
 
 
@@ -252,11 +306,37 @@ var _ = { };
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
   _.extend = function(obj) {
+    var currentObj = {};
+    if (typeof(obj) == "object"){
+		for (var i = 1; i < arguments.length; i++){
+			currentObj = arguments[i];
+			if (typeof(currentObj) == "object"){
+				for (var key in currentObj){
+					obj[key] = currentObj[key];	
+				};
+			};
+		};
+	};
+	return obj;	
   };
 
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
   _.defaults = function(obj) {
+    var currentObj = {};
+    if (typeof(obj) == "object"){
+		for (var i = 1; i < arguments.length; i++){
+			currentObj = arguments[i];
+			if (typeof(currentObj) == "object"){
+				for (var key in currentObj){
+					if (obj.hasOwnProperty(key) == false){
+						obj[key] = currentObj[key];	
+					};
+				};
+			};
+		};
+	};
+	return obj;	
   };
 
 
@@ -297,6 +377,17 @@ var _ = { };
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
+    var itemArr = {};
+    
+	return function(item){
+	    if (itemArr.hasOwnProperty(item)){
+    		return itemArr[item];
+    	}
+    	else{
+    		itemArr[item] = func.apply(this, arguments); 
+    		return itemArr[item];
+    	};
+    };
   };
 
   // Delays a function for the given number of milliseconds, and then calls
@@ -306,6 +397,14 @@ var _ = { };
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
   _.delay = function(func, wait) {
+    
+    // copy arguments to funcArgs
+  	var funcArgs = _.map(arguments, function(item){return item;});
+  	
+  	funcArgs = funcArgs.slice(2, funcArgs.length);
+  	window.setTimeout(function(){ 
+  		func.apply(this,funcArgs);},
+  	wait);
   };
 
 
@@ -316,6 +415,21 @@ var _ = { };
 
   // Shuffle an array.
   _.shuffle = function(array) {
+    // copy the array
+    var shuffled = _.map(array, function(item) { return item; });
+  	var shuffleFreq = shuffled.length;
+  	var index, tempVal;
+  	
+  	while (shuffleFreq > 0){
+  		// a randomized index
+  		index = Math.floor(Math.random() * (shuffleFreq + 1));
+  		shuffleFreq--;
+  	    
+  	    tempVal = shuffled[shuffleFreq];
+  	    shuffled[shuffleFreq] = shuffled[index];
+  		shuffled[index] = tempVal;
+  	};
+  		return shuffled;
   };
 
 
