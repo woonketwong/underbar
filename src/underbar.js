@@ -81,6 +81,7 @@ var _ = { };
   	var result = [];
   	  
   	_.each(collection, function(value){
+  	    // iterator(value) && result.push(value);
   		if (iterator(value) == true)
   		{
   			result.push(value);
@@ -95,6 +96,9 @@ var _ = { };
   _.reject = function(collection, iterator) {
     // TIP: see if you can re-use _.select() here, without simply
     // copying code in and modifying it
+    // return _.filter(collection, function(item){
+    //	return !iterator(item);
+    //});
   	var result = [];
   	  
   	_.each(collection, function(value){
@@ -111,6 +115,15 @@ var _ = { };
 
   // Produce a duplicate-free version of the array.
   _.uniq = function(array) {
+    /*
+    	var results = [];
+    	var visited = {};
+    	for (var i = 0; i < array.length; i++)
+    	{
+    		 
+    	
+    	
+    */
   
     var result = [];
     array.sort();
